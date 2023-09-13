@@ -1,3 +1,4 @@
+import multiprocessing
 from typing import List, Dict, Union
 
 import bs4
@@ -18,7 +19,7 @@ from exceptions import (
 DOMAIN = 'weblancer.net'
 URL = 'https://www.weblancer.net'
 
-class BaseWeblancerItemParser(AbstractItemParser):
+class WeblancerItemParser(AbstractItemParser):
     '''
     Class for parsing separated order items from weblancer
     '''
@@ -33,6 +34,7 @@ class BaseWeblancerItemParser(AbstractItemParser):
         except Exception:
             name = 'None'
         return name
+    
     def __get_order_description(self) -> str:
         item = self.item
         try:
@@ -41,6 +43,7 @@ class BaseWeblancerItemParser(AbstractItemParser):
         except Exception:
             description = 'None'
         return description
+    
     def __get_order_href(self) -> str:
         item = self.item
         try:
@@ -79,7 +82,7 @@ class WeblancerPageParser(BaseParser):
         else:
             raise EmptyPageException
 
-    def __init__(self, page:str, item_parser=BaseWeblancerItemParser):
+    def __init__(self, page:str, item_parser=WeblancerItemParser):
         self.item_parser = item_parser
         self.page = page
         self.__get_order_items()
@@ -125,28 +128,37 @@ class WeblancerScraper(BaseScraper):
         self.page_parser = page_parser
 
     def get_categories(self):
-        ''' Receives and returns categories as '''
+        '''Receives and returns categories'''
         url = URL + '/freelance'
         html_page = self._get_html(url)
         self.categories = WeblancerPageParser.parse_categories(html_page)
         return self.categories
     
+    def _handle_category(self, cat:Category, count_of_orders):
+        order_list = []
+        orders_left = count_of_orders
+        while orders_left > 0:
+            page_num = 1
+            href = f'{URL}{cat.href}?page={page_num}'
+            html_page = self._get_html(href)
+            parser = self.page_parser(html_page)
+            for order in parser.parse():
+                order_list.append(order)
+                orders_left -= 1
+                if orders_left == 0:
+                    break
+        return {cat.name: order_list}
+
     def get_data(self, category_ids:List[int], count_of_orders:int):
-        page_parser = self.page_parser
         cats_for_parse = [cat for cat in self.categories if cat.id in category_ids]
         order_list = []
-        for cat in cats_for_parse:
-            orders_left = count_of_orders
-            while orders_left > 0:
-                page_num = 1
-                href = f'{URL}{cat.href}?page={page_num}'
-                html_page = self._get_html(href)
-                parser = page_parser(html_page)
-                for order in parser.parse():
-                    order_list.append(order)
-                    orders_left -= 1
-                    if orders_left == 0:
-                        break
+
+        pool = multiprocessing.Pool(multiprocessing.cpu_count())
+        results = [pool.apply_async(self._handle_category, (cat, count_of_orders)) for cat in cats_for_parse]
+
+        order_list = [result.get() for result in results]
+
+
         return order_list
 
                 
