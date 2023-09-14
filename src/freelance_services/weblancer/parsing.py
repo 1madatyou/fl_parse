@@ -4,58 +4,59 @@ import bs4
 
 from base import (
     AbstractItemParser,
+    AbstractItemField,
     BaseParser,
 
     Category,
 )
-from exceptions import EmptyPageException
-from weblancer import URL
 
+from exceptions import EmptyPageException
+from freelance_services.weblancer import URL
+
+class WeblancerItemName(AbstractItemField):
+
+    def parse(self):
+        item = self.item
+        name = item.find('span', {'class': 'title'}).find('a').text
+        return name
+
+class WeblancerItemDescription(AbstractItemField):
+
+    def parse(self):
+        item = self.item
+        description_paragraphs = item.find('div', {'class': 'text-rich'}).find_all('p')
+        description = ' '.join([i.text for i in description_paragraphs])
+        return description
+
+class WeblancerItemHref(AbstractItemField):
+    
+    def parse(self):
+        item = self.item
+        route = item.find('span', {'class': 'title'}).find('a').get('href')
+        url = URL + route
+        return url
 
 class WeblancerItemParser(AbstractItemParser):
-    '''
-    Class for parsing separated order items from weblancer
-    '''
+    '''Class for parsing separated order items from weblancer'''
+
+    name = WeblancerItemName()
+    description = WeblancerItemDescription()
+    href = WeblancerItemHref()
 
     def set_item(self, item: bs4.Tag):
         self.item = item
-
-    def __get_order_name(self) -> str:
-        item = self.item
-        try:
-            name = item.find('span', {'class': 'title'}).find('a').text
-        except Exception:
-            name = 'None'
-        return name
-    
-    def __get_order_description(self) -> str:
-        item = self.item
-        try:
-            description_paragraphs = item.find('div', {'class': 'text-rich'}).find_all('p')
-            description = ' '.join([i.text for i in description_paragraphs])
-        except Exception:
-            description = 'None'
-        return description
-    
-    def __get_order_href(self) -> str:
-        item = self.item
-        try:
-            route = item.find('span', {'class': 'title'}).find('a').get('href')
-            url = URL + route
-            return url
-        except Exception:
-            return None
     
     def parse_item(self) -> Dict[str, Union[str, int]]:
 
-        item_dict = {
-            'name': self.__get_order_name(),
-            'description': self.__get_order_description(),
-            'href': self.__get_order_href()
-        }
-        
-        return {k:v for k, v in item_dict.items() if v is not None}
+        item_as_data = {}
 
+        for field_name, field_parser in self.__class__.__dict__.items():
+            print(field_name, field_parser, type(field_parser), isinstance(field_parser, AbstractItemField))
+            if isinstance(field_parser, AbstractItemField):
+                field_parser.set_item(self.item)
+                item_as_data[field_name] = field_parser.parse()              
+
+        return {k:v for k, v in item_as_data.items() if v is not None}
 
 class WeblancerPageParser(BaseParser):
     ''' Class for parsing pages from Weblancer  '''

@@ -8,11 +8,11 @@ from base import (
     AbstractItemParser
 )
 
-from freelance_services.weblancer.parsing import (
+from .parsing import (
     WeblancerPageParser,
     WeblancerItemParser
 )
-from freelance_services.weblancer.scraping import (
+from .scraping import (
     WeblancerScraper
 )
 
@@ -36,7 +36,7 @@ class WeblancerService(BaseFreelanceService):
         
         self.category_ids = list(map(int, (input('Введите номера подкатегорий через пробел: ').split(' '))))
         self.count_of_orders = int(input('Введите кол-во заказов: '))
-
+    
     def exec(self) -> List:
         data = self.scraper.get_data(self.category_ids, self.count_of_orders)
         return data

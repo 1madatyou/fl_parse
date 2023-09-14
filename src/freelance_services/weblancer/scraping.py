@@ -8,10 +8,12 @@ from base import (
 
     Category
 )
-from weblancer import URL
-from parsing import (
+from exceptions import EmptyPageException
+
+from freelance_services.weblancer import URL
+from .parsing import (
     WeblancerPageParser,
-    )
+)
 
 
 class WeblancerScraper(BaseScraper):
@@ -23,8 +25,8 @@ class WeblancerScraper(BaseScraper):
         cats_for_parse = [cat for cat in self.categories if cat.id in category_ids]
         order_list = []
 
-        pool = multiprocessing.Pool(multiprocessing.cpu_count())
-        results = [pool.apply_async(self._handle_category, (cat, count_of_orders)) for cat in cats_for_parse]
+        pool = multiprocessing.Pool(multiprocessing.cpu_count()*2)
+        results = [pool.apply_async(self._get_data_by_category, (cat, count_of_orders)) for cat in cats_for_parse]
 
         order_list = [result.get() for result in results]
 
@@ -40,18 +42,25 @@ class WeblancerScraper(BaseScraper):
         self.categories = self.page_parser.parse_categories(html_page)
         return self.categories
     
-    def _handle_category(self, cat:Category, count_of_orders: int) -> Dict[str, List]:
+    def _get_data_by_category(self, cat:Category, count_of_orders: int) -> Dict[str, List]:
         order_list = []
-        orders_left = count_of_orders
-        while orders_left > 0:
-            page_num = 1
+        count_of_orders_left = count_of_orders
+        page_num = 1
+
+        while count_of_orders_left > 0:
             href = f'{URL}{cat.href}?page={page_num}'
             html_page = self._get_response_text(href)
             parser = self.page_parser
             parser.set_page(html_page)
-            for order in parser.parse():
-                order_list.append(order)
-                orders_left -= 1
-                if orders_left == 0:
-                    break
+            try:
+                for order in parser.parse():
+                    order_list.append(order)
+                    count_of_orders_left -= 1
+                    if count_of_orders_left == 0:
+                        break
+            except EmptyPageException:
+                break
+            page_num += 1
+        count_of_orders_received = count_of_orders - count_of_orders_left
+        print(f'Total {count_of_orders_received} orders by category "{cat.name}"') 
         return {cat.name: order_list}

@@ -2,8 +2,10 @@ from abc import ABC, abstractmethod
 from typing import List
 
 import requests
+import bs4
 
 from exceptions import InvalidStatusCode
+from decorators import handle_field_error
 
 
 class Category:
@@ -15,6 +17,17 @@ class Category:
 
     def __str__(self):
         return f'Category: {self.name}'
+
+class AbstractItemField(ABC):
+    ''' Abstract class for parsing and setting up field '''
+
+    def set_item(self, item: bs4.Tag):
+        self.item = item
+
+    @handle_field_error
+    @abstractmethod
+    def parse(self) -> str:
+        pass
 
 class AbstractItemParser(ABC):
 
@@ -31,10 +44,12 @@ class BaseScraper:
     '''
 
     @staticmethod
-    def __get_response(request_url:str) -> requests.Response:
+    def __get_response(request_url:str, headers=None) -> requests.Response:
         if not isinstance(request_url, str):
             raise ValueError(f'Request url must be str, not {type(request_url)}')
-        headers = {'user-agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1'}
+        if not headers:
+            headers = {'user-agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1'}
+            
         response = requests.get(request_url, headers=headers)
         if response.status_code == 200:
             return response

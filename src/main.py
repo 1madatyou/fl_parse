@@ -1,8 +1,8 @@
-import unittest
 from typing import List, Type
 
-from freelance_services.weblancer.service import WeblancerService
 from base import BaseFreelanceService
+from utils import measure_time
+from freelance_services.weblancer.service import WeblancerService
 
 
 class FreelanceServiceManager:
@@ -16,10 +16,13 @@ class FreelanceServiceManager:
             service_instance = service()
             service_instance.exec()
 
-
-if __name__ == '__main__':
+@measure_time
+def main():
     service_list = [
         WeblancerService
     ]
     manager = FreelanceServiceManager(service_list)
     manager.start()
+
+if __name__ == '__main__':
+    main()
