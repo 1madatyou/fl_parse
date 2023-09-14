@@ -1,18 +1,25 @@
-import json
-import time
+import unittest
+from typing import List, Type
 
-from parsers.weblancer.service import WeblancerService
-from utils import time_counter
+from freelance_services.weblancer.service import WeblancerService
+from base import BaseFreelanceService
 
-@time_counter
-def main():
-    service = WeblancerService()
-    data = service.exec()
-    
-    with open('result.json', 'w', encoding='utf-8') as file:
-        json.dump(data, file, ensure_ascii=False)
+
+class FreelanceServiceManager:
+    ''' Class for executing several or one parsing services '''
+
+    def __init__(self, services:List[Type[BaseFreelanceService]]):
+        self.services = services
+
+    def start(self):
+        for service in self.services:
+            service_instance = service()
+            service_instance.exec()
 
 
 if __name__ == '__main__':
-    main()
-    
+    service_list = [
+        WeblancerService
+    ]
+    manager = FreelanceServiceManager(service_list)
+    manager.start()

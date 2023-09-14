@@ -1,5 +1,6 @@
 import multiprocessing
-from typing import List, Dict, Union
+import json
+from typing import List, Dict, Union, Type
 
 import bs4
 from bs4 import Tag
@@ -24,7 +25,7 @@ class WeblancerItemParser(AbstractItemParser):
     Class for parsing separated order items from weblancer
     '''
 
-    def __init__(self, item: Tag) -> None:
+    def set_item(self, item: Tag):
         self.item = item
 
     def __get_order_name(self) -> str:
@@ -48,46 +49,49 @@ class WeblancerItemParser(AbstractItemParser):
         item = self.item
         try:
             route = item.find('span', {'class': 'title'}).find('a').get('href')
+            url = URL + route
+            return url
         except Exception:
-            route = 'None'
-        url = URL + route
-        return url
+            return None
     
-    def __form_item_data(self) -> Dict[str, Union[str, int]]:
+    def parse_item(self) -> Dict[str, Union[str, int]]:
+
         item_dict = {
-            'name': self.item_name,
-            'description': self.item_description,
-            'href': self.item_href
+            'name': self.__get_order_name(),
+            'description': self.__get_order_description(),
+            'href': self.__get_order_href()
         }
-        item_dict_cleaned = {k:v for k, v in item_dict.items() if v is not None}
-        return item_dict_cleaned
-    
-    def parse_item(self):
-        self.item_name = self.__get_order_name()
-        self.item_description = self.__get_order_description()
-        self.item_href = self.__get_order_href()
         
-        item_data = self.__form_item_data()
-        
-        return item_data
+        return {k:v for k, v in item_dict.items() if v is not None}
+
 
 class WeblancerPageParser(BaseParser):
 
-    def __get_order_items(self):
+    def __init__(self, item_parser=WeblancerItemParser):
+        self.item_parser = item_parser
+
+    def set_page(self, html_page: str):
+        self.page = html_page
+
+    def parse(self):
+        '''Generator which parses the page and yields the data '''
+        order_items = self._get_order_items()
+
+        for item in order_items:
+            item_parser = self.item_parser
+            item_parser.set_item(item)
+            parsed_item = item_parser.parse_item()
+            yield parsed_item
+
+    def _get_order_items(self):
         soup_obj = bs4.BeautifulSoup(self.page, 'html.parser')
         order_table = soup_obj.find('div', {'class': 'cols_table divided_rows'})
         if order_table:
             order_items = order_table.findChildren('div', {'class': 'row'})
-            self.order_items = order_items
+            return order_items
         else:
             raise EmptyPageException
-
-    def __init__(self, page:str, item_parser=WeblancerItemParser):
-        self.item_parser = item_parser
-        self.page = page
-        self.__get_order_items()
-
-
+    
     @staticmethod
     def parse_categories(html_page:str) -> List[Category]:
         ''' Parse and returns categories '''
@@ -108,46 +112,12 @@ class WeblancerPageParser(BaseParser):
                 category_id += 1
                 category_list.append(new_category)
         return category_list
-    
-    @property
-    def count_of_order_items(self):
-        return len(self.order_items)
-
-    def parse(self):
-        '''Generator which parses the page and yields the data '''
-        order_items = self.order_items
-
-        for item in order_items:
-            data = self.item_parser(item).parse_item()
-            yield data
 
             
 class WeblancerScraper(BaseScraper):
 
-    def __init__(self, page_parser=WeblancerPageParser):
+    def __init__(self, page_parser: WeblancerPageParser):
         self.page_parser = page_parser
-
-    def get_categories(self):
-        '''Receives and returns categories'''
-        url = URL + '/freelance'
-        html_page = self._get_html(url)
-        self.categories = WeblancerPageParser.parse_categories(html_page)
-        return self.categories
-    
-    def _handle_category(self, cat:Category, count_of_orders):
-        order_list = []
-        orders_left = count_of_orders
-        while orders_left > 0:
-            page_num = 1
-            href = f'{URL}{cat.href}?page={page_num}'
-            html_page = self._get_html(href)
-            parser = self.page_parser(html_page)
-            for order in parser.parse():
-                order_list.append(order)
-                orders_left -= 1
-                if orders_left == 0:
-                    break
-        return {cat.name: order_list}
 
     def get_data(self, category_ids:List[int], count_of_orders:int):
         cats_for_parse = [cat for cat in self.categories if cat.id in category_ids]
@@ -158,8 +128,35 @@ class WeblancerScraper(BaseScraper):
 
         order_list = [result.get() for result in results]
 
+        with open('result.json', 'w', encoding='utf-8') as file:
+            json.dump(order_list, file, ensure_ascii=False)
 
         return order_list
+
+    def get_categories(self) -> List[Category]:
+        '''Receives and returns categories'''
+        url = URL + '/freelance'
+        html_page = self._get_response_text(url)
+        self.categories = self.page_parser.parse_categories(html_page)
+        return self.categories
+    
+    def _handle_category(self, cat:Category, count_of_orders: int) -> Dict[str, List]:
+        order_list = []
+        orders_left = count_of_orders
+        while orders_left > 0:
+            page_num = 1
+            href = f'{URL}{cat.href}?page={page_num}'
+            html_page = self._get_response_text(href)
+            parser = self.page_parser
+            parser.set_page(html_page)
+            for order in parser.parse():
+                order_list.append(order)
+                orders_left -= 1
+                if orders_left == 0:
+                    break
+        return {cat.name: order_list}
+
+    
 
                 
                 

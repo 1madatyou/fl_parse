@@ -22,26 +22,36 @@ class AbstractItemParser(ABC):
     def parse_item(self):
         pass
 
-class BaseParser(ABC):
+class BaseParser:
     pass
 
-class BaseScraper(ABC):
+class BaseScraper:
     '''
-    Class for getting data as html with http requests
+    Base class for getting data with http requests
     '''
 
     @staticmethod
-    def _get_html(request_url: str) -> str:
+    def __get_response(request_url:str) -> requests.Response:
+        if not isinstance(request_url, str):
+            raise ValueError(f'Request url must be str, not {type(request_url)}')
         headers = {'user-agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1'}
         response = requests.get(request_url, headers=headers)
         if response.status_code == 200:
-            return response.text
+            return response
         else:
             raise InvalidStatusCode
 
-class BaseService:
-    
-    def show_categories(self, categories: List[Category]):
+    @staticmethod
+    def _get_response_text(request_url: str) -> str:
+        response = BaseScraper.__get_response(request_url)
+        return response.text
+        
+
+class BaseFreelanceService:
+    ''' Base service of freelance exchange '''
+
+    @staticmethod
+    def show_categories(categories: List[Category]):
         for cat in categories:
             print(f'{cat.id}. {cat.name}')
 
