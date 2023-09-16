@@ -3,11 +3,9 @@ import json
 from typing import List, Dict
 
 
-from base import (
-    BaseScraper,
+from base.scraping import BaseScraper
+from base.items import Category
 
-    Category
-)
 from exceptions import EmptyPageException
 
 from freelance_services.weblancer import URL

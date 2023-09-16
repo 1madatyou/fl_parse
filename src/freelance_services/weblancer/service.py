@@ -1,12 +1,16 @@
 from typing import List, Type
 
-from base import (
-    BaseFreelanceService,
-
+from base.parsing import (
     BaseParser,
-    BaseScraper,
     AbstractItemParser
 )
+from base.scraping import (
+    BaseScraper
+)
+from base.service import (
+    BaseFreelanceService
+)
+
 
 from .parsing import (
     WeblancerPageParser,

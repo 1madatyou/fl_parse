@@ -3,14 +3,13 @@ from unittest.mock import MagicMock
 
 from bs4 import BeautifulSoup
 
-from freelance_services.weblancer.core import (
-    WeblancerItemParser,
-    WeblancerPageParser,
-    WeblancerScraper,
 
-    URL,
-    DOMAIN,
-)
+from freelance_services.weblancer.parsing import (
+    WeblancerItemParser,
+    WeblancerPageParser
+) 
+from freelance_services.weblancer import URL
+
 
 class TestWeblancerItemParser(unittest.TestCase):
 
@@ -29,8 +28,6 @@ class TestWeblancerItemParser(unittest.TestCase):
         result = self.parser.parsed_item
 
         self.assertEqual(result, expected_result)
-
-    
 
 
 if __name__ == '__main__':

@@ -2,13 +2,12 @@ from typing import Dict, Union, List
 
 import bs4
 
-from base import (
+from base.parsing import (
     AbstractItemParser,
-    AbstractItemField,
-    BaseParser,
-
-    Category,
+    BaseParser
 )
+from base.fields import AbstractItemField
+from base.items import Category
 
 from exceptions import EmptyPageException
 from freelance_services.weblancer import URL
