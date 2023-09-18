@@ -1,28 +1,29 @@
 from typing import List, Type
+import sys
 
-from base import BaseFreelanceService
+from PyQt5 import QtWidgets
+
+from base.services import BaseFreelanceService
 from utils import measure_time
 from freelance_services.weblancer.service import WeblancerService
+from GUI.main import FLGUI
 
 
-class FreelanceServiceManager:
-    ''' Class for executing several or one parsing services '''
 
-    def __init__(self, services:List[Type[BaseFreelanceService]]):
-        self.services = services
+# class FreelanceServiceManager:
+#     ''' Class for executing several or one parsing services '''
 
-    def start(self):
-        for service in self.services:
-            service_instance = service()
-            service_instance.exec()
+#     def __init__(self, services:List[Type[BaseFreelanceService]]):
+#         self.services = services
 
-@measure_time
-def main():
+
+if __name__ == '__main__':
     service_list = [
         WeblancerService
     ]
-    manager = FreelanceServiceManager(service_list)
-    manager.start()
-
-if __name__ == '__main__':
-    main()
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = FLGUI(service_list)
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())

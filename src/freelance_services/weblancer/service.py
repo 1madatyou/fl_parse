@@ -7,10 +7,12 @@ from base.parsing import (
 from base.scraping import (
     BaseScraper
 )
-from base.service import (
+from base.services import (
     BaseFreelanceService
 )
-
+from base.items import (
+    Category
+)
 
 from .parsing import (
     WeblancerPageParser,
@@ -23,7 +25,7 @@ from .scraping import (
 
 class WeblancerService(BaseFreelanceService):
 
-    PLATFORM = 'Weblancer'
+    PLATFORM = 'weblancer'
 
     def __init__(self, 
                     scraper_cls:Type[BaseScraper]=WeblancerScraper,
@@ -35,15 +37,15 @@ class WeblancerService(BaseFreelanceService):
         self.scraper = scraper_cls(page_parser=page_parser)
 
         categories = self.scraper.get_categories()
-        
-        self.show_categories(categories)
-        
-        self.category_ids = list(map(int, (input('Введите номера подкатегорий через пробел: ').split(' '))))
-        self.count_of_orders = int(input('Введите кол-во заказов: '))
+
+    def get_categories(self) -> List[Category]:
+        return self.scraper.get_categories()
     
-    def exec(self) -> List:
-        data = self.scraper.get_data(self.category_ids, self.count_of_orders)
-        return data
+    def execute(self, category_names:List[str], count_of_orders:int) -> List:
+        data = self.scraper.get_processed_data(category_names, count_of_orders)
+        print(len(data))
+        for writing_method in self.writing_methods:
+            writing_method(self.PLATFORM).write_to_file(data)
 
         
 

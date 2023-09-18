@@ -50,7 +50,6 @@ class WeblancerItemParser(AbstractItemParser):
         item_as_data = {}
 
         for field_name, field_parser in self.__class__.__dict__.items():
-            print(field_name, field_parser, type(field_parser), isinstance(field_parser, AbstractItemField))
             if isinstance(field_parser, AbstractItemField):
                 field_parser.set_item(self.item)
                 item_as_data[field_name] = field_parser.parse()              
