@@ -20,7 +20,7 @@ class FLGUI():
     def _init_service_category_checkboxes(self):
         self.checkboxes = []
         counter = 0
-        for category in self.current_service.get_categories():
+        for category in self.current_service.categories:
             new_checkbox = QtWidgets.QCheckBox(self.scrollAreaWidgetContents)
             new_checkbox.setText(category.name)
             self.verticalLayout_4.addWidget(new_checkbox)

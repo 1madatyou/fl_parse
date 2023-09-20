@@ -12,7 +12,6 @@ class BaseFreelanceService(ABC):
     def set_writing_methods(self, methods:List):
         self.writing_methods = methods
 
-    @abstractmethod
     def get_categories(self) -> List[Category]:
         return self.scraper.get_categories()
 

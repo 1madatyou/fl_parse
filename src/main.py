@@ -9,14 +9,6 @@ from freelance_services.weblancer.service import WeblancerService
 from GUI.main import FLGUI
 
 
-
-# class FreelanceServiceManager:
-#     ''' Class for executing several or one parsing services '''
-
-#     def __init__(self, services:List[Type[BaseFreelanceService]]):
-#         self.services = services
-
-
 if __name__ == '__main__':
     service_list = [
         WeblancerService

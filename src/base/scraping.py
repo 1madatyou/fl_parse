@@ -9,7 +9,7 @@ class BaseScraper:
     '''
 
     @staticmethod
-    def __get_response(request_url:str, headers=None) -> requests.Response:
+    def _get_response(request_url:str, headers=None) -> requests.Response:
         if not isinstance(request_url, str):
             raise ValueError(f'Request url must be str, not {type(request_url)}')
         if not headers:
@@ -23,5 +23,5 @@ class BaseScraper:
 
     @staticmethod
     def _get_response_text(request_url: str) -> str:
-        response = BaseScraper.__get_response(request_url)
+        response = BaseScraper._get_response(request_url)
         return response.text

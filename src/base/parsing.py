@@ -12,3 +12,9 @@ class AbstractItemParser(ABC):
 
 class BaseParser:
     pass
+
+class BaseHTMLParser(BaseParser):
+    pass
+
+class BaseJSONParser(BaseParser):
+    pass
