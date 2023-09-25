@@ -1,12 +1,18 @@
 import requests
+from abc import ABC, abstractmethod
 
 from exceptions import InvalidStatusCode
 
 
-class BaseScraper:
+class BaseScraper(ABC):
     '''
     Base class for getting data with http requests
     '''
+
+    @abstractmethod
+    def get_categories(self,):
+        pass
+
 
     @staticmethod
     def _get_response(request_url:str, headers=None) -> requests.Response:

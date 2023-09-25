@@ -5,42 +5,66 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from base.services import BaseFreelanceService
 from write import XLSXWriter, JsonWriter
 
+from .threads import ExecutingThread
 
-class FLGUI():
+
+
+class MainGUI():
 
     def __init__(self, fl_services: List[Type[BaseFreelanceService]]) -> None:
         self.fl_services = {service.PLATFORM: service() for service in fl_services}
 
-    def _init_service_combo_box(self):
-        self.comboBox = QtWidgets.QComboBox(self.verticalLayoutWidget)
-        self.comboBox.setObjectName("comboBox")
-        self.comboBox.addItems([service_platform for service_platform in self.fl_services])
-        self.current_service = self.fl_services[self.comboBox.currentText()]
+    def _clear_category_checkboxes(self):
+        while self.verticalLayout_4.count():
+            child = self.verticalLayout_4.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+
 
     def _init_service_category_checkboxes(self):
+        self._clear_category_checkboxes()
         self.checkboxes = []
-        counter = 0
         for category in self.current_service.categories:
             new_checkbox = QtWidgets.QCheckBox(self.scrollAreaWidgetContents)
             new_checkbox.setText(category.name)
             self.verticalLayout_4.addWidget(new_checkbox)
             self.checkboxes.append(new_checkbox)
-            counter += 1
-            if counter == 200:
-                break
     
+    def _change_service(self):
+        self.current_service = self.fl_services[self.comboBox.currentText()]
+        self._init_service_category_checkboxes()
+
+    def _init_service_combo_box(self):
+        self.comboBox = QtWidgets.QComboBox(self.verticalLayoutWidget)
+        self.comboBox.setObjectName("comboBox")
+        self.comboBox.addItems([service_platform for service_platform in self.fl_services])
+        self.comboBox.currentIndexChanged.connect(self._change_service)
+        self.current_service = self.fl_services[self.comboBox.currentText()]
+
+
+
     def _init_start_button(self):
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setGeometry(QtCore.QRect(60, 440, 261, 51))
         self.pushButton.setObjectName("pushButton")
         self.pushButton.clicked.connect(self.start)
 
+    def _init_progress_dialog(self):
+        self.progressDialog = QtWidgets.QProgressDialog('Executing...', 'Close', 0, 100, parent=self.mainWindow)
+        self.progressDialog.close()
+        self.progressDialog.setCancelButton(None)
+        self.progressDialog.setAutoClose(False)
+        self.progressDialog.setAutoReset(False)
+        
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(381, 553)
+        self.mainWindow = MainWindow
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
 
+        self._init_progress_dialog()
         self._init_start_button()
 
         self.formLayoutWidget = QtWidgets.QWidget(self.centralwidget)
@@ -118,6 +142,7 @@ class FLGUI():
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
+
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -125,17 +150,38 @@ class FLGUI():
         for checkbox in self.checkboxes:
             checkbox.setChecked(state)
 
-    def start(self):
-        service = self.current_service
+    def _get_count_of_orders(self) -> int:
+        try:
+            input_string = self.countOfOrdersInput.toPlainText()
+            input_value = int(input_string)
+            return input_value
+        except Exception:
+            raise Exception('Incorrect count of orders')
+
+    def _set_writing_methods(self):
         writing_methods = []
         if self.XlsxCheckbox.isChecked():
             writing_methods.append(XLSXWriter)
         if self.JsonCheckbox.isChecked():
             writing_methods.append(JsonWriter)
-        service.set_writing_methods(writing_methods)
-        count_of_orders = int(self.countOfOrdersInput.toPlainText())
-        category_names = [checkbox.text() for checkbox in self.checkboxes if checkbox.isChecked()]
-        service.execute(category_names, count_of_orders)
+
+        if not len(writing_methods):
+            raise Exception("No recording methods have been selected")
+
+        self.current_service.set_writing_methods(writing_methods)
+
+    def start(self):
+        try:
+            self._set_writing_methods()
+            count_of_orders = self._get_count_of_orders()
+            category_names = [checkbox.text() for checkbox in self.checkboxes if checkbox.isChecked()]
+            self.executingThread = ExecutingThread(self.mainWindow, self, self.current_service, category_names, count_of_orders)
+            self.executingThread.start()
+            self.progressDialog.exec()
+        except Exception as ex:
+            print(f'Error has occured: {str(ex)}')
+            self.progressDialog.close()
+            QtWidgets.QMessageBox.critical(self.mainWindow,'Error', ex.__str__())
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
