@@ -1,5 +1,5 @@
 
-def handle_field_error(func):
+def handle_error(func):
     def wrap(*args, **kwargs):
         try:
             return func(*args, **kwargs)

@@ -2,7 +2,7 @@ from typing import List, Type
 
 from base.parsing import (
     BaseParser,
-    AbstractItemParser
+    BaseItemParser
 )
 from base.scraping import (
     BaseScraper
@@ -10,41 +10,30 @@ from base.scraping import (
 from base.services import (
     BaseFreelanceService
 )
-from base.items import (
-    Category
-)
-from base.processing import AbstractDataProcessor
-
-
+from base.processing import BaseDataProcessor
 from .parsing import (
-    WeblancerPageParser,
+    WeblancerHTMLParser,
     WeblancerItemParser
 )
 from .scraping import (
     WeblancerScraper
 )
-from .processing import WeblancerDataProcessor
 
 
 
 class WeblancerService(BaseFreelanceService):
 
-    PLATFORM = 'weblancer'
+    platform = 'weblancer'
 
     def __init__(self, 
-                 data_processor_cls: Type[AbstractDataProcessor]=WeblancerDataProcessor, 
+                 data_processor_cls: Type[BaseDataProcessor]=BaseDataProcessor, 
                  scraper_cls: Type[BaseScraper]=WeblancerScraper, 
-                 page_parser_cls: Type[BaseParser]=WeblancerPageParser, 
-                 item_parser_cls: Type[AbstractItemParser]=WeblancerItemParser):
+                 page_parser_cls: Type[BaseParser]=WeblancerHTMLParser, 
+                 item_parser_cls: Type[BaseItemParser]=WeblancerItemParser):
         
         super().__init__(data_processor_cls, scraper_cls, page_parser_cls, item_parser_cls)
 
-    def execute(self, category_names:List[str], count_of_orders:int) -> List:
-        data = self.data_processor.get_processed_data(category_names, count_of_orders, self.categories)
-        for writing_method in self.writing_methods:
-            writing_method(self.PLATFORM).write_to_file(data)
-
-        print('Finished')
+    
 
         
 

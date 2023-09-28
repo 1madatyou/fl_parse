@@ -12,7 +12,7 @@ from .threads import ExecutingThread
 class MainGUI():
 
     def __init__(self, fl_services: List[Type[BaseFreelanceService]]) -> None:
-        self.fl_services = {service.PLATFORM: service() for service in fl_services}
+        self.fl_services = {service.platform: service() for service in fl_services}
 
     def _clear_category_checkboxes(self):
         while self.verticalLayout_4.count():
@@ -32,6 +32,7 @@ class MainGUI():
     
     def _change_service(self):
         self.current_service = self.fl_services[self.comboBox.currentText()]
+        self.selectAllCheckbox.setChecked(False)
         self._init_service_category_checkboxes()
 
     def _init_service_combo_box(self):
@@ -40,8 +41,6 @@ class MainGUI():
         self.comboBox.addItems([service_platform for service_platform in self.fl_services])
         self.comboBox.currentIndexChanged.connect(self._change_service)
         self.current_service = self.fl_services[self.comboBox.currentText()]
-
-
 
     def _init_start_button(self):
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
@@ -175,6 +174,8 @@ class MainGUI():
             self._set_writing_methods()
             count_of_orders = self._get_count_of_orders()
             category_names = [checkbox.text() for checkbox in self.checkboxes if checkbox.isChecked()]
+            if not len(category_names):
+                raise Exception("No cateogories have been selected")
             self.executingThread = ExecutingThread(self.mainWindow, self, self.current_service, category_names, count_of_orders)
             self.executingThread.start()
             self.progressDialog.exec()
