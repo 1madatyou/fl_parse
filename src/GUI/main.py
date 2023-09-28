@@ -1,12 +1,12 @@
 from typing import List, Type
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 from base.services import BaseFreelanceService
 from write import XLSXWriter, JsonWriter
 
 from .threads import ExecutingThread
-
+from .partials import CustomProgressDialog
 
 
 class MainGUI():
@@ -48,22 +48,31 @@ class MainGUI():
         self.pushButton.setObjectName("pushButton")
         self.pushButton.clicked.connect(self.start)
 
-    def _init_progress_dialog(self):
-        self.progressDialog = QtWidgets.QProgressDialog('Executing...', 'Close', 0, 100, parent=self.mainWindow)
-        self.progressDialog.close()
-        self.progressDialog.setCancelButton(None)
-        self.progressDialog.setAutoClose(False)
-        self.progressDialog.setAutoReset(False)
-        
+    def _set_main_window_to_center(self):
+        # Получаем разрешение экрана
+        screen = QtWidgets.QApplication.primaryScreen()
+        rect = screen.availableGeometry()
+
+        # Вычисляем центр экрана
+        center_x = rect.width() // 2
+        center_y = rect.height() // 2
+
+        # Вычисляем координаты главного окна относительно центра экрана
+        new_x = center_x - self.mainWindow.width() // 2
+        new_y = center_y - self.mainWindow.height() // 2
+
+        # Перемещаем главное окно в центр экрана
+        self.mainWindow.move(new_x, new_y)
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(381, 553)
         self.mainWindow = MainWindow
+        self._set_main_window_to_center()
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
 
-        self._init_progress_dialog()
+        self.progressDialog = CustomProgressDialog(self.mainWindow)
         self._init_start_button()
 
         self.formLayoutWidget = QtWidgets.QWidget(self.centralwidget)
