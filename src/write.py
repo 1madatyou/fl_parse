@@ -7,7 +7,7 @@ import pandas
 
 class AbstractDataWriter(ABC):
 
-    EXTENSION = None
+    EXTENSION: str
 
     def __init__(self, filename) -> None:
         self.filename = filename
@@ -33,7 +33,7 @@ class XLSXWriter(AbstractDataWriter):
     EXTENSION = '.xlsx'
 
     def _prepare_data(self, data: List[Dict]) -> Dict[str,List]:
-        data_structured = {}
+        data_structured: Dict = {}
         for item_dict in data:
             for k, v in item_dict.items():
                 if data_structured.get(k):

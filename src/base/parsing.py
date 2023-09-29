@@ -38,24 +38,24 @@ class BaseItemParser(ABC):
 
 class BaseParser(ABC):
 
+    def __init__(self, item_parser: BaseItemParser) -> None:
+        super().__init__()
+        self.item_parser = item_parser
+
     @staticmethod
     @abstractmethod
     def parse_categories(html:str) -> List[Category]:
         pass
 
     @abstractmethod
-    def parse(self, raw_data: Any) -> Any:
+    def parse(self, *args, **kwargs) -> Any:
         pass
+
+    def set_data(self, data: Any):
+        self.data = data
 
 
 class BaseHTMLParser(BaseParser):
-
-    def __init__(self, item_parser: BaseItemParser) -> None:
-        super().__init__()
-        self.item_parser = item_parser
-
-    def set_page(self, html_page: str):
-        self.page = html_page
 
     @abstractmethod
     def _get_order_list(self):

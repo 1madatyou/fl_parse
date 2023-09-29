@@ -14,11 +14,12 @@ class BaseDataProcessor(ABC):
 
     def get_processed_data(self, category_names:List[str], count_of_orders:int, categories:List[Category]) -> List:
         cats_for_parse = [cat for cat in categories if cat.name in category_names]
-        order_list = []
+        order_list: List = []
         pool = multiprocessing.Pool(multiprocessing.cpu_count()*2)
         results = [pool.apply_async(self._get_data_by_category, (cat, count_of_orders)) for cat in cats_for_parse]
         order_list = []
-        [order_list.extend(result.get()) for result in results]
+        for result in results:
+            order_list.extend(result.get())
         return order_list
 
     def _get_data_by_category(self, cat:Category, count_of_orders: int) -> List:
@@ -30,7 +31,7 @@ class BaseDataProcessor(ABC):
             href = f'{self.scraper.base_url}{cat.href}?page={page_num}'
             html_page = self.scraper._get_response_text(href)
             parser = self.scraper.page_parser
-            parser.set_page(html_page)
+            parser.set_data(html_page)
             try:
                 for order in parser.parse():
                     order['category'] = cat.name

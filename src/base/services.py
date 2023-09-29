@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
+from abc import ABC
+from typing import List, Type, Optional
 
-from typing import List, Type
 from base.items import Category
 from base.parsing import (
     BaseParser,
@@ -18,7 +18,7 @@ from base.processing import BaseDataProcessor
 class BaseFreelanceService(ABC):
     ''' Base service of freelance exchange '''
 
-    platform:str = None
+    platform: str
 
     def __init__(self, 
                     data_processor_cls:Type[BaseDataProcessor],
@@ -31,10 +31,11 @@ class BaseFreelanceService(ABC):
         self.scraper = scraper_cls(page_parser=page_parser)
         self.data_processor = data_processor_cls(scraper=self.scraper)
 
-        self._categories = None
+        self._categories: Optional[List[Category]] = None
 
-    def execute(self, category_names:List[str], count_of_orders:int) -> List:
+    def execute(self, category_names:List[str], count_of_orders:int) -> None:
         data = self.data_processor.get_processed_data(category_names, count_of_orders, self.categories)
+
         for writing_method in self.writing_methods:
             writing_method(self.platform).write_to_file(data)
 

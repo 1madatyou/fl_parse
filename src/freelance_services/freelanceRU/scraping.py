@@ -7,8 +7,8 @@ from base.parsing import BaseParser
 
 class FreelanceRUScraper(BaseScraper):
 
-    base_url = 'https://www.freelance.ru'
-    category_root = '/project/search/pro'
+    base_url: str = 'https://www.freelance.ru'
+    category_route: str = '/project/search/pro'
 
 
     

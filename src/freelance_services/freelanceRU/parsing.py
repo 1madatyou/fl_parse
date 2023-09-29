@@ -35,7 +35,7 @@ class FreelanceRUItemParser(BaseItemParser):
 class FreelanceRUHTMLParser(BaseHTMLParser):
     
     def _get_order_list(self) -> Optional[List[bs4.Tag]]:
-        soup = bs4.BeautifulSoup(self.page, 'html.parser')
+        soup = bs4.BeautifulSoup(self.data, 'html.parser')
         order_table = soup.find('div', {'id': 'w0'})
         order_list = order_table.find_all('div', {'class': 'project'})
         

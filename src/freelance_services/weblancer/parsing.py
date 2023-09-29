@@ -49,7 +49,7 @@ class WeblancerHTMLParser(BaseHTMLParser):
         self.item_parser = item_parser
 
     def _get_order_list(self) -> Optional[List[bs4.Tag]]:
-        soup_obj = bs4.BeautifulSoup(self.page, 'html.parser')
+        soup_obj = bs4.BeautifulSoup(self.data, 'html.parser')
         order_table = soup_obj.find('div', {'class': 'cols_table divided_rows'})
         if order_table:
             order_items = order_table.findChildren('div', {'class': 'row'})

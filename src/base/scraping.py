@@ -13,6 +13,9 @@ class BaseScraper(ABC):
     Base class for getting data with http requests
     '''
 
+    base_url: str
+    category_route: str
+
     def __init__(self, page_parser: BaseParser):
         self.page_parser = page_parser
 
@@ -20,7 +23,7 @@ class BaseScraper(ABC):
 
     def get_categories(self) -> List[Category]:
         '''Returns list of categories'''
-        url = self.base_url + self.category_root
+        url = self.base_url + self.category_route
         html_page = self._get_response_text(url)
         categories = self.page_parser.parse_categories(html_page)
         return categories
@@ -48,6 +51,6 @@ class BaseScraper(ABC):
         else:
             raise InvalidStatusCode(response.status_code)
 
-    def _get_response_text(self, request_url: str, with_session=False) -> str:
+    def _get_response_text(self, request_url: str, with_session: bool=False) -> str:
         response = self._get_response(request_url, with_session)
         return response.text
