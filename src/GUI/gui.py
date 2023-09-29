@@ -20,7 +20,6 @@ class MainGUI():
             if child.widget():
                 child.widget().deleteLater()
 
-
     def _init_service_category_checkboxes(self):
         self._clear_category_checkboxes()
         self.checkboxes = []

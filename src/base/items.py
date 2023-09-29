@@ -3,7 +3,7 @@ from abc import ABC
 
 class Category:
 
-    def __init__(self, name:str, href:str):
+    def __init__(self, name: str, href: str):
         self.name = name
         self.href = href
 
