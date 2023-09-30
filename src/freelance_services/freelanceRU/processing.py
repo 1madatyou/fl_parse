@@ -17,7 +17,7 @@ class FreelanceRUDataProcessor(BaseDataProcessor):
             href = f'{self.scraper.base_url}{cat.href}%3Fpage%3D2&page={page_num}&per-page=25'
             print(href)
             html_page = self.scraper._get_response_text(href, with_session=True)
-            parser = self.scraper.page_parser
+            parser = self.scraper.parser
             parser.set_page(html_page)
             try:
                 for order in parser.parse():

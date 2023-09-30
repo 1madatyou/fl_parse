@@ -1,5 +1,5 @@
 
-class InvalidStatusCode(Exception):
+class InvalidResponse(Exception):
     pass
 
 class EmptyPageException(Exception):

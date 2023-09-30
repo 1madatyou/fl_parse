@@ -23,9 +23,12 @@ class BaseItemFieldParser(ABC):
 class BaseItemParser(ABC):
 
     def set_item(self, item: bs4.Tag):
+        if not isinstance(item, bs4.Tag):
+            raise TypeError(f'Item should be bs4.Tag, not {type(item)}')
+        
         self.item = item
 
-    def parse_item(self) -> Dict[str, Union[str, int]]:
+    def parse_item(self) -> Dict[str, Any]:
 
         item_as_data = {}
 
@@ -38,13 +41,12 @@ class BaseItemParser(ABC):
 
 class BaseParser(ABC):
 
-    def __init__(self, item_parser: BaseItemParser) -> None:
-        super().__init__()
+    def __init__(self, item_parser: BaseItemParser):
         self.item_parser = item_parser
 
     @staticmethod
     @abstractmethod
-    def parse_categories(html:str) -> List[Category]:
+    def parse_categories(html: str) -> List[Category]:
         pass
 
     @abstractmethod
@@ -58,14 +60,16 @@ class BaseParser(ABC):
 class BaseHTMLParser(BaseParser):
 
     @abstractmethod
-    def _get_order_list(self):
+    def _get_order_list(self) -> List:
         pass
 
-    def parse(self) -> Generator[Dict[str, str | int], None, None]:
+    def parse(self) -> Generator[Dict[str, Any], None, None]:
         
         order_list = self._get_order_list()
         
-        if order_list is None or len(order_list) == 0:
+        if not isinstance(order_list, List):
+            raise TypeError
+        if not len(order_list):
             raise EmptyPageException
 
         for order in order_list:

@@ -32,7 +32,7 @@ class FreelanceRUService(BaseFreelanceService):
     def __init__(self, 
                  data_processor_cls: Type[BaseDataProcessor]=FreelanceRUDataProcessor, 
                  scraper_cls: Type[BaseScraper]=FreelanceRUScraper, 
-                 page_parser_cls: Type[BaseParser]=FreelanceRUHTMLParser, 
+                 parser_cls: Type[BaseParser]=FreelanceRUHTMLParser, 
                  item_parser_cls: Type[BaseItemParser]=FreelanceRUItemParser):
         
-        super().__init__(data_processor_cls, scraper_cls, page_parser_cls, item_parser_cls)
+        super().__init__(data_processor_cls, scraper_cls, parser_cls, item_parser_cls)

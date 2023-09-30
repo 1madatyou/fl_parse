@@ -30,7 +30,7 @@ class BaseDataProcessor(ABC):
         while count_of_orders_left > 0:
             href = f'{self.scraper.base_url}{cat.href}?page={page_num}'
             html_page = self.scraper._get_response_text(href)
-            parser = self.scraper.page_parser
+            parser = self.scraper.parser
             parser.set_data(html_page)
             try:
                 for order in parser.parse():

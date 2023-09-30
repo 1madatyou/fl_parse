@@ -28,10 +28,10 @@ class WeblancerService(BaseFreelanceService):
     def __init__(self, 
                  data_processor_cls: Type[BaseDataProcessor]=BaseDataProcessor, 
                  scraper_cls: Type[BaseScraper]=WeblancerScraper, 
-                 page_parser_cls: Type[BaseParser]=WeblancerHTMLParser, 
+                 parser_cls: Type[BaseParser]=WeblancerHTMLParser, 
                  item_parser_cls: Type[BaseItemParser]=WeblancerItemParser):
         
-        super().__init__(data_processor_cls, scraper_cls, page_parser_cls, item_parser_cls)
+        super().__init__(data_processor_cls, scraper_cls, parser_cls, item_parser_cls)
 
     
 

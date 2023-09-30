@@ -23,12 +23,12 @@ class BaseFreelanceService(ABC):
     def __init__(self, 
                     data_processor_cls:Type[BaseDataProcessor],
                     scraper_cls:Type[BaseScraper],
-                    page_parser_cls:Type[BaseParser],
+                    parser_cls:Type[BaseParser],
                     item_parser_cls:Type[BaseItemParser]):
 
         item_parser = item_parser_cls()
-        page_parser = page_parser_cls(item_parser=item_parser)
-        self.scraper = scraper_cls(page_parser=page_parser)
+        parser = parser_cls(item_parser=item_parser)
+        self.scraper = scraper_cls(parser=parser)
         self.data_processor = data_processor_cls(scraper=self.scraper)
 
         self._categories: Optional[List[Category]] = None
