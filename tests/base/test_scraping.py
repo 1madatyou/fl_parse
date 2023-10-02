@@ -10,19 +10,6 @@ from src.base.scraping import BaseScraper
 from exceptions import InvalidResponse
 
 
-@pytest.fixture
-def parser(monkeypatch, categories):
-    mock_parser = Mock()
-    monkeypatch.setattr(mock_parser, 'parse_categories', lambda self: categories)
-    return mock_parser
-
-@pytest.fixture()
-def scraper(parser):
-    scraper = BaseScraper(parser)
-    scraper.base_url = "http://www.example.com/"
-    scraper.category_route = "/category"
-    return scraper
-
 
 
 class TestBaseScraper:

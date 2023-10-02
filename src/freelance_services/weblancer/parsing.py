@@ -72,7 +72,7 @@ class WeblancerHTMLParser(BaseHTMLParser):
             categories = cat.find_next_sibling('ul').find_all('a')
             for subcat in categories:
                 category_name = subcat.text.replace('\xa0', ' ')
-                category_href = subcat.get('href')
+                category_route = subcat.get('href')
                 new_category = Category(category_name, category_href)
                 category_list.append(new_category)
         return category_list

@@ -3,9 +3,9 @@ from abc import ABC
 
 class Category:
 
-    def __init__(self, name: str, href: str):
+    def __init__(self, name: str, route: str):
         self.name = name
-        self.href = href
+        self.route = route
 
     def __str__(self):
         return f'Category: {self.name}'

@@ -8,61 +8,10 @@ from src.base.parsing import (
     BaseItemParser,
     BaseItemFieldParser,
     BaseHTMLParser
-
 )
 
-@pytest.fixture
-def raw_html():
-    raw_html = '''
+from exceptions import EmptyPageException
 
-    <html>
-        <div class="item_list">
-            <div class="item">
-                <ul>
-                    <li class="name"></li>
-                    <li class="description"></li>
-                    <li class="something"></li>
-                </ul>
-            </div>
-            <div class="item">
-                <ul>
-                    <li class="name"></li>
-                    <li class="description"></li>
-                    <li class="something"></li>
-                </ul>
-            </div>
-            <div class="item">
-                <ul>
-                    <li class="name"></li>
-                    <li class="description"></li>
-                    <li class="something"></li>
-                </ul>
-            </div>
-            <div class="item">
-                <ul>
-                    <li class="name"></li>
-                    <li class="description"></li>
-                    <li class="something"></li>
-                </ul>
-            </div>
-        </div>
-    </html>
-'''
-    return raw_html
-
-@pytest.fixture
-def soup(raw_html):
-    soup = bs4.BeautifulSoup(raw_html, 'html.parser')
-    return soup
-
-@pytest.fixture
-def bs4_tag_list(soup):
-    tag_list = soup.find_all('div', {'class': 'item'})
-    return tag_list
-
-@pytest.fixture
-def bs4_tag(bs4_tag_list):
-    return bs4_tag_list[0]
 
 @pytest.fixture
 def item_parser():
@@ -79,7 +28,8 @@ class ItemFieldName(BaseItemFieldParser):
 class ItemFieldDescription(BaseItemFieldParser):
     def parse(self) -> str:
         return "Parsed description"
-    
+
+# HTMLParser Implementation
 class HTMLParser(BaseHTMLParser):
     
     def _get_order_list(self) -> List:
@@ -119,8 +69,29 @@ class TestBaseHTMLParser():
     def parser(self, item_parser):
         parser = HTMLParser(item_parser)
         return parser
+    
+    @pytest.mark.parametrize(
+        "order_list, expectation",
+        [
+            ('bs4_tag_list', does_not_raise()),
+
+            ('test_string', pytest.raises(TypeError)),
+            (12345, pytest.raises(TypeError)),
+            (None, pytest.raises(TypeError)),
+
+            ([], pytest.raises(EmptyPageException)),
+        ]
+    )
+    def test_parse(self, order_list, expectation, monkeypatch, parser, request):
+        with expectation:
+            if order_list in ('bs4_tag_list',):
+                order_list = request.getfixturevalue(order_list)
+            monkeypatch.setattr(parser, '_get_order_list', lambda: order_list)
+
+            for item in parser.parse():
+                assert isinstance(item, dict)
+
         
-    ### TESTS
 
 
 

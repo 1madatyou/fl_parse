@@ -56,11 +56,10 @@ class BaseParser(ABC):
     def set_data(self, data: Any):
         self.data = data
 
-
 class BaseHTMLParser(BaseParser):
 
     @abstractmethod
-    def _get_order_list(self) -> List:
+    def _get_order_list(self) -> List[bs4.Tag]:
         pass
 
     def parse(self) -> Generator[Dict[str, Any], None, None]:
@@ -77,8 +76,3 @@ class BaseHTMLParser(BaseParser):
             parsed_item = self.item_parser.parse_item() 
             yield parsed_item
 
-class BaseJSONParser(BaseParser):
-    
-    @abstractmethod
-    def parse(self, json: Dict[Any, Any]) -> Any:
-        pass
