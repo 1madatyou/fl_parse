@@ -7,6 +7,7 @@ def measure_time(func):
         start_time = time.time()
         func()
         end_time = time.time()
-        exec_time = (end_time - start_time)
-        print(f'Время выполнения: {exec_time} сек.')
+        exec_time = end_time - start_time
+        print(f"Время выполнения: {exec_time} сек.")
+
     return wrapper

@@ -6,7 +6,14 @@ from base.services import BaseFreelanceService
 
 class ExecutingThread(QThread):
 
-    def __init__(self, parent: QObject | None, gui, service: BaseFreelanceService , category_names: List[str], count_of_orders: int) -> None:
+    def __init__(
+        self,
+        parent: QObject | None,
+        gui,
+        service: BaseFreelanceService,
+        category_names: List[str],
+        count_of_orders: int,
+    ) -> None:
         super().__init__(parent)
         self.parent = parent
         self.gui = gui
@@ -17,5 +24,4 @@ class ExecutingThread(QThread):
     def run(self):
         self.service.execute(self.category_names, self.count_of_orders)
         self.gui.progressDialog.setValue(100)
-        self.gui.progressDialog.setLabelText('Completed successfully')
-        
+        self.gui.progressDialog.setLabelText("Completed successfully")

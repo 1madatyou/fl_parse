@@ -9,7 +9,7 @@ from .threads import ExecutingThread
 from .partials import CustomProgressDialog
 
 
-class MainGUI():
+class MainGUI:
 
     def __init__(self, fl_services: List[Type[BaseFreelanceService]]) -> None:
         self.fl_services = {service.platform: service() for service in fl_services}
@@ -28,7 +28,7 @@ class MainGUI():
             new_checkbox.setText(category.name)
             self.verticalLayout_4.addWidget(new_checkbox)
             self.checkboxes.append(new_checkbox)
-    
+
     def _change_service(self):
         self.current_service = self.fl_services[self.comboBox.currentText()]
         self.selectAllCheckbox.setChecked(False)
@@ -37,7 +37,9 @@ class MainGUI():
     def _init_service_combo_box(self):
         self.comboBox = QtWidgets.QComboBox(self.verticalLayoutWidget)
         self.comboBox.setObjectName("comboBox")
-        self.comboBox.addItems([service_platform for service_platform in self.fl_services])
+        self.comboBox.addItems(
+            [service_platform for service_platform in self.fl_services]
+        )
         self.comboBox.currentIndexChanged.connect(self._change_service)
         self.current_service = self.fl_services[self.comboBox.currentText()]
 
@@ -123,7 +125,7 @@ class MainGUI():
         self.verticalLayout_4.setObjectName("verticalLayout_4")
         self._init_service_category_checkboxes()
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        
+
         self.verticalLayout_3.addWidget(self.scrollArea)
 
         self.verticalLayoutWidget_4 = QtWidgets.QWidget(self.centralwidget)
@@ -149,7 +151,6 @@ class MainGUI():
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
-
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -163,7 +164,7 @@ class MainGUI():
             input_value = int(input_string)
             return input_value
         except Exception:
-            raise Exception('Incorrect count of orders')
+            raise Exception("Incorrect count of orders")
 
     def _set_writing_methods(self):
         writing_methods = []
@@ -181,16 +182,24 @@ class MainGUI():
         try:
             self._set_writing_methods()
             count_of_orders = self._get_count_of_orders()
-            category_names = [checkbox.text() for checkbox in self.checkboxes if checkbox.isChecked()]
+            category_names = [
+                checkbox.text() for checkbox in self.checkboxes if checkbox.isChecked()
+            ]
             if not len(category_names):
                 raise Exception("No cateogories have been selected")
-            self.executingThread = ExecutingThread(self.mainWindow, self, self.current_service, category_names, count_of_orders)
+            self.executingThread = ExecutingThread(
+                self.mainWindow,
+                self,
+                self.current_service,
+                category_names,
+                count_of_orders,
+            )
             self.executingThread.start()
             self.progressDialog.exec()
         except Exception as ex:
-            print(f'Error has occured: {str(ex)}')
+            print(f"Error has occured: {str(ex)}")
             self.progressDialog.close()
-            QtWidgets.QMessageBox.critical(self.mainWindow,'Error', ex.__str__())
+            QtWidgets.QMessageBox.critical(self.mainWindow, "Error", ex.__str__())
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -202,4 +211,3 @@ class MainGUI():
         self.label_2.setText(_translate("MainWindow", "Categories:"))
         self.selectAllCheckbox.setText(_translate("MainWindow", "Select all"))
         self.label_3.setText(_translate("MainWindow", "Count of orders:"))
-

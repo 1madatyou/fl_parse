@@ -9,11 +9,8 @@ from freelance_services.freelanceRU.service import FreelanceRUService
 from GUI.gui import MainGUI
 
 
-if __name__ == '__main__':
-    service_list = [
-        WeblancerService,
-        FreelanceRUService
-    ]
+if __name__ == "__main__":
+    service_list = [WeblancerService, FreelanceRUService]
 
     app = QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
